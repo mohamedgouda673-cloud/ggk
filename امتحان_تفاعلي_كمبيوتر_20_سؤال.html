@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>امتحان تفاعلي - أساسيات الكمبيوتر</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:"Tahoma","Arial",sans-serif;background:linear-gradient(135deg,#eef4ff,#f8fbff);color:#172033}
+.container{max-width:900px;margin:30px auto;padding:20px}
+.card{background:#fff;border-radius:20px;padding:28px;box-shadow:0 10px 35px rgba(0,0,0,.08)}
+h1,h2{text-align:center;color:#183b72}
+.subtitle{text-align:center;color:#667085;margin-bottom:25px}
+.progress{height:10px;background:#e8edf5;border-radius:20px;overflow:hidden;margin-bottom:22px}
+.progress span{display:block;height:100%;width:0;background:#2f6fed;transition:.3s}
+.question{font-size:21px;font-weight:bold;margin:15px 0 22px}
+.option{display:block;padding:15px;margin:11px 0;border:1px solid #d9e0ea;border-radius:12px;cursor:pointer;transition:.2s}
+.option:hover{background:#f2f7ff;border-color:#2f6fed}
+.option input{margin-left:10px;transform:scale(1.2)}
+input[type=text],input[type=tel]{width:100%;padding:14px;border:1px solid #ccd5e1;border-radius:10px;font-size:16px;margin-top:7px}
+label.field{display:block;margin:16px 0;font-weight:bold}
+button{border:0;border-radius:12px;padding:13px 24px;font-size:16px;cursor:pointer}
+.primary{background:#2f6fed;color:#fff}.secondary{background:#eef2f7;color:#27364d}
+.actions{display:flex;justify-content:space-between;gap:10px;margin-top:25px}
+.hidden{display:none}
+.result{text-align:center}
+.score{font-size:48px;font-weight:bold;color:#2f6fed;margin:15px}
+.badge{display:inline-block;padding:8px 15px;border-radius:20px;background:#eef4ff;color:#2454a6}
+.whatsapp{display:inline-block;margin-top:22px;background:#25D366;color:white;text-decoration:none;padding:14px 24px;border-radius:12px;font-weight:bold}
+.small{font-size:13px;color:#667085;margin-top:18px;text-align:center}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="card">
+<div id="start">
+<h1>اختبار تفاعلي في أساسيات الكمبيوتر</h1>
+<p class="subtitle">20 سؤال اختيار من متعدد — مستوى متوسط</p>
+<label class="field">اسم الممتحن
+<input id="name" type="text" placeholder="اكتب الاسم بالكامل"></label>
+<label class="field">رقم التليفون
+<input id="phone" type="tel" placeholder="مثال: 01xxxxxxxxx"></label>
+<label class="field">القسم
+<input id="dept" type="text" placeholder="اكتب القسم"></label>
+<button class="primary" style="width:100%;margin-top:10px" onclick="startExam()">بدء الاختبار</button>
+<p class="small">يتكون الاختبار من 20 سؤالاً، ولكل سؤال إجابة صحيحة واحدة.</p>
+</div>
+
+<div id="exam" class="hidden">
+<h2 id="qnum"></h2>
+<div class="progress"><span id="bar"></span></div>
+<div id="question"></div>
+<div id="options"></div>
+<div class="actions">
+<button class="secondary" onclick="prevQ()">السابق</button>
+<button class="primary" id="nextBtn" onclick="nextQ()">التالي</button>
+</div>
+<p class="small">السؤال <span id="counter"></span> من 20</p>
+</div>
+
+<div id="result" class="hidden result">
+<h1>نتيجة الاختبار</h1>
+<p id="studentInfo"></p>
+<div class="score" id="score"></div>
+<div class="badge" id="message"></div>
+<p id="details"></p>
+<a id="wa" class="whatsapp" target="_blank">إرسال النتيجة عبر واتساب</a>
+<br>
+<button class="secondary" style="margin-top:15px" onclick="location.reload()">إعادة الاختبار</button>
+</div>
+</div>
+</div>
+
+<script>
+const questions=[
+{q:"أي جزء من الحاسوب يُستخدم لتنفيذ التعليمات ومعالجة البيانات؟",o:["وحدة المعالجة المركزية CPU","لوحة المفاتيح","الشاشة","الطابعة"],a:0},
+{q:"أي من الآتي يُعد من وحدات الإدخال؟",o:["الشاشة","الطابعة","لوحة المفاتيح","السماعات"],a:2},
+{q:"ما الوظيفة الأساسية لنظام التشغيل؟",o:["إنشاء شبكة الإنترنت","إدارة موارد الحاسوب وتشغيل البرامج","طباعة المستندات فقط","زيادة حجم الشاشة"],a:1},
+{q:"أي من الآتي يُستخدم لتخزين الملفات حتى بعد إيقاف تشغيل الحاسوب؟",o:["RAM","SSD","CPU","Cache"],a:1},
+{q:"ما المقصود بالامتداد .pptx؟",o:["ملف صورة","ملف عرض تقديمي","ملف صوت","ملف مضغوط"],a:1},
+{q:"في برامج معالجة النصوص، ما وظيفة Ctrl + C؟",o:["قص","نسخ","لصق","حفظ"],a:1},
+{q:"ما وظيفة Ctrl + V؟",o:["لصق","نسخ","تراجع","بحث"],a:0},
+{q:"أي من الآتي يُعد متصفح ويب؟",o:["Windows","Google Chrome","PowerPoint","Excel"],a:1},
+{q:"ما المقصود بعنوان IP؟",o:["اسم المستخدم","عنوان يميز جهازاً على الشبكة","نوع المعالج","كلمة مرور"],a:1},
+{q:"أي بروتوكول يُستخدم غالباً لتصفح المواقع بشكل آمن؟",o:["HTTP","HTTPS","FTP","SMTP"],a:1},
+{q:"ما أفضل وصف للـ RAM؟",o:["ذاكرة مؤقتة سريعة لتشغيل البرامج","قرص تخزين دائم","جهاز إدخال","برنامج حماية"],a:0},
+{q:"في Excel، أي رمز يبدأ به إدخال المعادلة؟",o:["#","=","@","&"],a:1},
+{q:"أي دالة في Excel تُستخدم لجمع مجموعة من الأرقام؟",o:["SUM","COUNTIF","MAX","IF"],a:0},
+{q:"ما فائدة النسخ الاحتياطي Backup؟",o:["زيادة سرعة الإنترنت","حماية البيانات وإمكانية استعادتها","تغيير نظام التشغيل","حذف الملفات نهائياً"],a:1},
+{q:"أي كلمة مرور تعتبر أقوى نسبياً؟",o:["12345678","password","Ahmed2026","M7@qL#92z!"],a:3},
+{q:"ما المقصود بالتصيد الإلكتروني Phishing؟",o:["تنظيف الجهاز","محاولة خداع المستخدم للحصول على بيانات حساسة","ضغط الملفات","تحديث الشاشة"],a:1},
+{q:"أي من الآتي مثال على التخزين السحابي؟",o:["Google Drive","لوحة المفاتيح","BIOS","CPU"],a:0},
+{q:"ما فائدة ضغط الملفات بصيغة ZIP؟",o:["تصغير حجم الملفات وتجميعها","زيادة دقة الصور","تشغيل الإنترنت","إزالة نظام التشغيل"],a:0},
+{q:"ما المقصود بالشبكة المحلية LAN؟",o:["شبكة تغطي منطقة صغيرة مثل معمل أو مبنى","شبكة الأقمار الصناعية فقط","برنامج مكتبي","نوع من الطابعات"],a:0},
+{q:"عند ظهور رابط أو مرفق مجهول في رسالة بريد إلكتروني، ما التصرف الأكثر أماناً؟",o:["فتحه فوراً","إرساله للأصدقاء","التحقق من المصدر قبل فتحه","إدخال كلمة المرور أولاً"],a:2}
+];
+
+let current=0, answers=Array(questions.length).fill(null), started=false;
+function startExam(){
+ const n=document.getElementById("name").value.trim(), p=document.getElementById("phone").value.trim(), d=document.getElementById("dept").value.trim();
+ if(!n||!p||!d){alert("من فضلك أدخل الاسم ورقم التليفون والقسم.");return}
+ started=true;
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("exam").classList.remove("hidden");
+ render();
+}
+function render(){
+ const x=questions[current];
+ document.getElementById("qnum").textContent="السؤال "+(current+1);
+ document.getElementById("counter").textContent=current+1;
+ document.getElementById("bar").style.width=((current+1)/questions.length*100)+"%";
+ document.getElementById("question").innerHTML='<div class="question">'+x.q+'</div>';
+ document.getElementById("options").innerHTML=x.o.map((v,i)=>
+ '<label class="option"><input type="radio" name="ans" value="'+i+'" '+(answers[current]===i?"checked":"")+' onchange="answers[current]=Number(this.value)"> '+v+'</label>'
+ ).join("");
+ document.getElementById("nextBtn").textContent=current===questions.length-1?"إنهاء الاختبار":"التالي";
+}
+function saveAnswer(){
+ const chosen=document.querySelector('input[name="ans"]:checked');
+ if(chosen) answers[current]=Number(chosen.value);
+}
+function nextQ(){
+ saveAnswer();
+ if(answers[current]===null){alert("اختر إجابة قبل الانتقال.");return}
+ if(current<questions.length-1){current++;render()}else finish();
+}
+function prevQ(){
+ saveAnswer();
+ if(current>0){current--;render()}
+}
+function finish(){
+ let score=answers.reduce((s,v,i)=>s+(v===questions[i].a?1:0),0);
+ const n=document.getElementById("name").value.trim(), p=document.getElementById("phone").value.trim(), d=document.getElementById("dept").value.trim();
+ document.getElementById("exam").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ document.getElementById("studentInfo").innerHTML="<b>الاسم:</b> "+escapeHTML(n)+" &nbsp; | &nbsp; <b>القسم:</b> "+escapeHTML(d);
+ document.getElementById("score").textContent=score+" / 20";
+ let msg=score>=17?"ممتاز — أداء رائع":score>=14?"جيد جداً":score>=10?"جيد — يمكنك تحسين النتيجة":"تحتاج إلى مزيد من المراجعة";
+ document.getElementById("message").textContent=msg;
+ document.getElementById("details").textContent="النسبة المئوية: "+Math.round(score/20*100)+"%";
+ const text=`نتيجة اختبار أساسيات الكمبيوتر%0Aالاسم: ${encodeURIComponent(n)}%0Aالقسم: ${encodeURIComponent(d)}%0Aالنتيجة: ${score}/20%0Aالنسبة: ${Math.round(score/20*100)}%`;
+ document.getElementById("wa").href="https://wa.me/201550067683?text="+text;
+}
+function escapeHTML(s){return s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+</script>
+</body>
+</html>
